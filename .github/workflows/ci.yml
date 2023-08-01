@@ -1,0 +1,61 @@
+name: CI
+on: 
+  push:
+    branches:
+      - '**'
+    paths:
+      - "**"
+      - "!.github/**"
+      - ".github/workflows/ci.yml"
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  configure-build-test:
+    runs-on: ubuntu-latest
+    env:
+      BUILD_DIR: "build"
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: "Install Dependencies"
+        run: |
+          echo "@todo"
+
+      - name: "Configure CMake"
+        id: configure
+        run: >
+          cmake . -B "${{ env.BUILD_DIR }}"
+          -DCMAKE_BUILD_TYPE="Release"
+          -Werror=dev
+
+      - name: Lint
+        working-directory: ${{ env.BUILD_DIR }}
+        run: cmake --build . --target lint --verbose -j `nproc`
+
+      - name: Docs
+        working-directory: ${{ env.BUILD_DIR }}
+        run: cmake --build . --target docs --verbose -j `nproc`
+
+      - name: Build library
+        working-directory: ${{ env.BUILD_DIR }}
+        run: cmake --build . --target grwe --verbose -j `nproc`
+
+      - name: Build example
+        working-directory: ${{ env.BUILD_DIR }}
+        run: cmake --build . --target example --verbose -j `nproc`
+
+      - name: Build tests
+        working-directory: ${{ env.BUILD_DIR }}
+        run: cmake --build . --target tests --verbose -j `nproc`
+
+      - name: Run example
+        working-directory: ${{ env.BUILD_DIR }}
+        run: ./example/example
+
+      - name: Run tests
+        working-directory: ${{ env.BUILD_DIR }}
+        run: ctest
