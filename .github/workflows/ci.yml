@@ -43,9 +43,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # @todo - use fromJson so it actually selects from a matrix
-        os: ${{ needs.ci-matrix.outputs.MATRIX_OS }}
-        cxx: ${{ needs.ci-matrix.outputs.MATRIX_CXX }}
+        os: ${{ fromJSON(needs.ci-matrix.outputs.MATRIX_OS) }}
+        cxx: ${{ fromJSON(needs.ci-matrix.outputs.MATRIX_CXX) }}
     env:
       BUILD_DIR: "build"
     steps:
