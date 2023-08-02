@@ -13,9 +13,39 @@ defaults:
   run:
     shell: bash
 
+# @todo - set a group based on the pr, so that only the latest job for a pr will run to save cI workers?
+# concurrency:
+  # group: 
+  # cancel-in-progress: true
+
 jobs:
-  configure-build-test:
+
+  # Job to select the matrix for the next step, based on the job.
+  ci-matrix:
     runs-on: ubuntu-latest
+    outputs:
+      MATRIX_OS: ${{ steps.output-matrix.outputs.MATRIX_OS }}
+      MATRIX_CXX: ${{ steps.output-matrix.outputs.MATRIX_CXX }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set job matrix
+        id: output-matrix
+        run: | 
+          MATRIX_OS="ubuntu-latest"
+          echo "MATRIX_OS=${MATRIX_OS}" | tee -a "$GITHUB_OUTPUT"
+          MATRIX_CXX="gcc-9"
+          echo "MATRIX_CXX=${MATRIX_CXX}" | tee -a "$GITHUB_OUTPUT"
+
+  everything:
+    name: "everything ${{ matrix.os }} ${{ matrix.cxx }}"
+    needs: [ci-matrix]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # @todo - use fromJson so it actually selects from a matrix
+        os: ${{ needs.ci-matrix.outputs.MATRIX_OS }}
+        cxx: ${{ needs.ci-matrix.outputs.MATRIX_CXX }}
     env:
       BUILD_DIR: "build"
     steps:
@@ -23,7 +53,9 @@ jobs:
 
       - name: "Install Dependencies"
         run: |
-          echo "@todo"
+          echo "apt-get install ..."
+          echo "./install-cuda.sh"
+          echo "apt install python-x"
 
       - name: "Configure CMake"
         id: configure
@@ -59,3 +91,17 @@ jobs:
       - name: Run tests
         working-directory: ${{ env.BUILD_DIR }}
         run: ctest
+
+      # Pretend to save artifacts
+      - name: Save artifacts
+        working-dir: ${{ env.BUILD_DIR }}
+        run: echo "Pretending to save arttifacts"
+  
+  # # Job to create the draft release, if requested. This is fake.
+  # draft-release:
+  #   needs: [everything]
+  #   runs-on: ubuntu-latest
+  #    steps:
+  #     - uses: actions/checkout@v3
+  #     - name: createa draft
+  #       run: echo "pretending to create a draft release"
