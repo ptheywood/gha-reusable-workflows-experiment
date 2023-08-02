@@ -31,9 +31,9 @@ jobs:
       - name: Set job matrix
         id: output-matrix
         run: | 
-          MATRIX_OS="[ubuntu-latest]"
+          MATRIX_OS='["ubuntu-latest"]'
           echo "MATRIX_OS=${MATRIX_OS}" | tee -a "$GITHUB_OUTPUT"
-          MATRIX_CXX="[gcc-9]"
+          MATRIX_CXX='["gcc-9"]'
           echo "MATRIX_CXX=${MATRIX_CXX}" | tee -a "$GITHUB_OUTPUT"
 
   everything:
