@@ -94,7 +94,7 @@ jobs:
 
       # Pretend to save artifacts
       - name: Save artifacts
-        working-dir: ${{ env.BUILD_DIR }}
+        working-directory: ${{ env.BUILD_DIR }}
         run: echo "Pretending to save arttifacts"
   
   # # Job to create the draft release, if requested. This is fake.
